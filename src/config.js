@@ -1,4 +1,4 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME ||'RUvaxxed'
+const CONTRACT_NAME = process.env.CONTRACT_NAME ||'dev-1643404486644-64508019040013'
 
 function getConfig(env) {
   switch (env) {
