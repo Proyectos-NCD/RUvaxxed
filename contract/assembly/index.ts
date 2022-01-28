@@ -1,34 +1,32 @@
-/*
- * This is an example of an AssemblyScript smart contract with two simple,
- * symmetric functions:
- *
- * 1. setGreeting: accepts a greeting, such as "howdy", and records it for the
- *    user (account_id) who sent the request
- * 2. getGreeting: accepts an account_id and returns the greeting saved for it,
- *    defaulting to "Hello"
- *
- * Learn more about writing NEAR smart contracts with AssemblyScript:
- * https://docs.near.org/docs/develop/contracts/as/intro
- *
- */
+//importar metodos
+import { PersistentUnorderedMap, logging, context, u128, ContractPromiseBatch } from 'near-sdk-as'
+//export es poner algo en publico
+//crea un mapa que guarda la respuesta del usuario
+export const registros = new PersistentUnorderedMap<string, bool>("r"); //r es como un nombre dentro del contrato
+//0.5 NEAR
+export const RECOMPENSA = u128.from('500000000000000000000000');
+//funcion que recibe la respuesta (parametro) booleano
+export function registerVaxxed(response: bool): void{ 
+  //consulta si ya se registro el usuario
+  //el context.sender es el id del usuario en near (quien esta ejecutando ese comando)
+  const registro = registros.contains(context.sender)
+//evalua o revisa si ya esta registrado
+  if(registro){ //true
+    //logging.log es para poner algo en pantalla, como print y lo guarda en el contrato
+    logging.log(`Ya has realizado esta operación.`);
+  }
+  else{
+    //set guarda la respuesta del usuario con su ID en el Mapa de registros
+    registros.set(context.sender,response);
+    logging.log(`Te has registrado con éxito.`);
 
-import { Context, logging, storage } from 'near-sdk-as'
-
-const DEFAULT_MESSAGE = 'Hello'
-
-// Exported functions will be part of the public interface for your smart contract.
-// Feel free to extract behavior to non-exported functions!
-export function getGreeting(accountId: string): string | null {
-  // This uses raw `storage.get`, a low-level way to interact with on-chain
-  // storage for simple contracts.
-  // If you have something more complex, check out persistent collections:
-  // https://docs.near.org/docs/concepts/data-storage#assemblyscript-collection-types
-  return storage.get<string>(accountId, DEFAULT_MESSAGE)
-}
-
-export function setGreeting(message: string): void {
-  const accountId = Context.sender
-  // Use logging.log to record logs permanently to the blockchain!
-  logging.log(`Saving greeting "${message}" for account "${accountId}"`)
-  storage.set(accountId, message)
+    if(response){
+      //manda Near
+      ContractPromiseBatch.create(context.sender).transfer(RECOMPENSA)
+      logging.log(`Gracias por vacunarte! Recibiste una recompensa de 0.5 NEAR! :D`);
+    }
+    else{
+      logging.log(`Porfavor, vacunate!.`);
+    }
+  }
 }

@@ -9,7 +9,7 @@
 # build
 /out
 /dist
-
+/contract/build
 # keys
 /neardev
 
